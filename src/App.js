@@ -3,6 +3,14 @@ import Papa from 'papaparse'
 import { motion } from 'framer-motion'
 import { Search } from 'lucide-react'
 
+// Local images from src/assets
+import nspcLogo from './assets/nspc_logo.jpg'
+import nsndpLogo from './assets/nsndp_logo.jpg'
+import nslpLogo from './assets/nslp-logo.png'
+import cpcLogo from './assets/cpclogo.png'
+import ndpcaLogo from './assets/ndpcalogo.jpg'
+import lpcLogo from './assets/lpclogo.jpg'
+
 /** Debounce hook to reduce lag when filtering large data */
 function useDebounce(value, delay = 300) {
   const [debouncedValue, setDebouncedValue] = useState(value)
@@ -21,34 +29,27 @@ export default function App() {
   // --- Sorting State
   const [sortConfig, setSortConfig] = useState({ key: null, order: 'asc' })
 
-  // Handle column header clicks
   function handleSortClick(header) {
     setSortConfig((prev) => {
       if (prev.key === header) {
-        // Toggle asc <-> desc
         return { ...prev, order: prev.order === 'asc' ? 'desc' : 'asc' }
       } else {
-        // New header, reset to ascending
         return { key: header, order: 'asc' }
       }
     })
   }
 
-  // Sorting function that sorts by sortConfig
   function sortData(data) {
-    if (!sortConfig.key) return data // no sort if no column chosen
-
+    if (!sortConfig.key) return data
     const { key, order } = sortConfig
     const sorted = [...data].sort((a, b) => {
       let aVal = a[key] ?? ''
       let bVal = b[key] ?? ''
-
-      // Attempt numeric parse
+      // numeric parse
       const aNum = parseFloat(String(aVal).replace(/[$,]/g, ''))
       const bNum = parseFloat(String(bVal).replace(/[$,]/g, ''))
       const isNumericA = !isNaN(aNum)
       const isNumericB = !isNaN(bNum)
-
       if (isNumericA && isNumericB) {
         return order === 'asc' ? aNum - bNum : bNum - aNum
       } else {
@@ -63,20 +64,17 @@ export default function App() {
     return sorted
   }
 
-  // Fetch & parse CSV from GitHub
+  // 1) Parse CSV from public folder ( /data.csv )
   useEffect(() => {
-    Papa.parse(
-      'https://raw.githubusercontent.com/smjoud/NSpolidonations/main/data.csv',
-      {
-        download: true,
-        header: true,
-        skipEmptyLines: true,
-        complete: (results) => setCsvData(results.data),
-      }
-    )
+    Papa.parse('/data.csv', {
+      download: true,
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => setCsvData(results.data),
+    })
   }, [])
 
-  // Color rows by party
+  // 2) Color rows by party
   function getRowColor(partyValue = '') {
     const p = partyValue.toLowerCase()
     if (p.includes('pc')) return '#639ee0'
@@ -87,7 +85,7 @@ export default function App() {
     return ''
   }
 
-  // Summarize donations by party
+  // 3) Summaries
   function getPartyTotals(data) {
     const totals = { pc: 0, ndp: 0, liberal: 0, cpc: 0, ndpca: 0, lpc: 0 }
     data.forEach((row) => {
@@ -104,23 +102,18 @@ export default function App() {
     return totals
   }
 
-  // Specialized Search: "LastName FirstName" approach
+  // 4) Specialized Search: "LastName FirstName"
   const filteredData = useMemo(() => {
     if (!debouncedSearch) return []
-    // Split user input into at most two parts: [lastName, firstName]
     const [lastNameSearch, firstNameSearch] = debouncedSearch
       .split(/\s+/, 2)
       .map((s) => s.toLowerCase())
-
     return csvData.filter((row) => {
       const rowLast = (row['Last Name'] || '').toLowerCase()
       const rowFirst = (row['First Name'] || '').toLowerCase()
-
       if (!firstNameSearch) {
-        // Only last name given
         return rowLast.includes(lastNameSearch)
       } else {
-        // last & first name given
         return (
           rowLast.includes(lastNameSearch) &&
           rowFirst.includes(firstNameSearch)
@@ -129,12 +122,12 @@ export default function App() {
     })
   }, [debouncedSearch, csvData])
 
-  // Sort the filtered data
+  // 5) Sort the filtered data
   const sortedFilteredData = useMemo(() => {
     return sortData(filteredData)
   }, [filteredData, sortConfig])
 
-  // Totals for the final data shown
+  // 6) Totals
   const partyTotals = useMemo(() => getPartyTotals(sortedFilteredData), [sortedFilteredData])
 
   return (
@@ -219,7 +212,7 @@ export default function App() {
             {/* PC */}
             <div className="flex items-center">
               <img
-                src="https://raw.githubusercontent.com/smjoud/NSpolidonations/main/img/nspc_logo.jpg"
+                src={nspcLogo} // local image
                 alt="PC Party Logo"
                 className="w-10 h-10 rounded-full mr-3"
               />
@@ -229,7 +222,7 @@ export default function App() {
             {/* NDP */}
             <div className="flex items-center">
               <img
-                src="https://raw.githubusercontent.com/smjoud/NSpolidonations/main/img/nsndp_logo.jpg"
+                src={nsndpLogo}
                 alt="NDP Party Logo"
                 className="w-10 h-10 rounded-full mr-3"
               />
@@ -239,7 +232,7 @@ export default function App() {
             {/* Liberal */}
             <div className="flex items-center">
               <img
-                src="https://raw.githubusercontent.com/smjoud/NSpolidonations/main/img/nslp-logo.png"
+                src={nslpLogo}
                 alt="Liberal Party Logo"
                 className="w-10 h-10 rounded-full mr-3"
               />
@@ -249,7 +242,7 @@ export default function App() {
             {/* CPC */}
             <div className="flex items-center">
               <img
-                src="https://raw.githubusercontent.com/smjoud/NSpolidonations/main/img/cpclogo.png"
+                src={cpcLogo}
                 alt="CPC Party Logo"
                 className="w-10 h-10 rounded-full mr-3"
               />
@@ -259,7 +252,7 @@ export default function App() {
             {/* NDPCA */}
             <div className="flex items-center">
               <img
-                src="https://raw.githubusercontent.com/smjoud/NSpolidonations/main/img/ndpcalogo.jpg"
+                src={ndpcaLogo}
                 alt="NDPCA Party Logo"
                 className="w-10 h-10 rounded-full mr-3"
               />
@@ -269,7 +262,7 @@ export default function App() {
             {/* LPC */}
             <div className="flex items-center">
               <img
-                src="https://raw.githubusercontent.com/smjoud/NSpolidonations/main/img/lpclogo.jpg"
+                src={lpcLogo}
                 alt="Liberal Party of Canada Logo"
                 className="w-10 h-10 rounded-full mr-3"
               />
@@ -285,7 +278,9 @@ export default function App() {
           Collected from Elections Nova Scotia covering from 2005-2023. Only donations
           of $200 or more are publicly reported from 2010 onward.
         </p>
-        <p className="mt-1">Type your Last Name followed by a space, then First Name. Click table headers to sort.</p>
+        <p className="mt-1">
+          Type your Last Name followed by a space, then First Name. Click table headers to sort.
+        </p>
       </div>
     </div>
   )
