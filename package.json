@@ -2,7 +2,7 @@
   "name": "my-csv-app",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://smjoud.github.io/nspolidonationsCA",
+  "homepage": "https://nspolidonors.ca",
   "dependencies": {
     "@shadcn/ui": "^0.0.4",
     "cra-template": "1.2.0",
