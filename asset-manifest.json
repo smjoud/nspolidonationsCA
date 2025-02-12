@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/nspolidonationsCA/static/css/main.e7f6f044.css",
-    "main.js": "/nspolidonationsCA/static/js/main.9b8c4b5a.js",
-    "static/media/nspc_logo.jpg": "/nspolidonationsCA/static/media/nspc_logo.801e5796a6193a480299.jpg",
-    "static/media/cpclogo.png": "/nspolidonationsCA/static/media/cpclogo.4cd65dd28399f70237b0.png",
-    "static/media/lpclogo.jpg": "/nspolidonationsCA/static/media/lpclogo.00144515d3e399713c94.jpg",
-    "index.html": "/nspolidonationsCA/index.html",
-    "main.e7f6f044.css.map": "/nspolidonationsCA/static/css/main.e7f6f044.css.map",
-    "main.9b8c4b5a.js.map": "/nspolidonationsCA/static/js/main.9b8c4b5a.js.map"
+    "main.css": "/static/css/main.e7f6f044.css",
+    "main.js": "/static/js/main.d13b0441.js",
+    "static/media/nspc_logo.jpg": "/static/media/nspc_logo.801e5796a6193a480299.jpg",
+    "static/media/cpclogo.png": "/static/media/cpclogo.4cd65dd28399f70237b0.png",
+    "static/media/lpclogo.jpg": "/static/media/lpclogo.00144515d3e399713c94.jpg",
+    "index.html": "/index.html",
+    "main.e7f6f044.css.map": "/static/css/main.e7f6f044.css.map",
+    "main.d13b0441.js.map": "/static/js/main.d13b0441.js.map"
   },
   "entrypoints": [
     "static/css/main.e7f6f044.css",
-    "static/js/main.9b8c4b5a.js"
+    "static/js/main.d13b0441.js"
   ]
 }
