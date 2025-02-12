@@ -66,7 +66,7 @@ export default function App() {
 
   // 1) Parse CSV from public folder ( /data.csv )
   useEffect(() => {
-    Papa.parse('/data.csv', {
+    Papa.parse('./data.csv', {
       download: true,
       header: true,
       skipEmptyLines: true,
@@ -279,7 +279,7 @@ export default function App() {
           of $200 or more are publicly reported from 2010 onward.
         </p>
         <p className="mt-1">
-          Type your Last Name followed by a space, then First Name. Click table headers to sort.
+          Type your Last Name followed by a space, then First Name. Click table headers to sort!.
         </p>
       </div>
     </div>
