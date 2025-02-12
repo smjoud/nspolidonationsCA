@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useCallback } from 'react'
 import { Helmet } from 'react-helmet'
 import Papa from 'papaparse'
 import { motion } from 'framer-motion'
@@ -42,6 +42,7 @@ export default function App() {
 
   // Sorting state
   const [sortConfig, setSortConfig] = useState({ key: null, order: 'asc' })
+
   function handleSortClick(header) {
     setSortConfig((prev) => {
       if (prev.key === header) {
@@ -88,7 +89,6 @@ export default function App() {
               if (party.includes('Liberal Party of Canada')) {
                 party = 'LPC'
               }
-
               if (party.includes('New Democratic Party')) {
                 party = 'NDP-CA'
               }
@@ -127,90 +127,78 @@ export default function App() {
     })
   }, [])
 
-  // Sorting function
-  function sortData(data) {
-    if (!sortConfig.key) return data
-    const { key, order } = sortConfig
-    const sorted = [...data].sort((a, b) => {
-      let aVal = a[key] ?? ''
-      let bVal = b[key] ?? ''
+  // 1) Wrap sortData in a useCallback
+  const sortData = useCallback(
+    (data) => {
+      if (!sortConfig.key) return data
+      const { key, order } = sortConfig
+      const sorted = [...data].sort((a, b) => {
+        let aVal = a[key] ?? ''
+        let bVal = b[key] ?? ''
 
-      // numeric parse attempt
-      const aNum = parseFloat(String(aVal).replace(/[$,]/g, ''))
-      const bNum = parseFloat(String(bVal).replace(/[$,]/g, ''))
-      const isNumericA = !isNaN(aNum)
-      const isNumericB = !isNaN(bNum)
-      if (isNumericA && isNumericB) {
-        return order === 'asc' ? aNum - bNum : bNum - aNum
-      } else {
-        // string compare
-        aVal = aVal.toLowerCase()
-        bVal = bVal.toLowerCase()
-        if (aVal < bVal) return order === 'asc' ? -1 : 1
-        if (aVal > bVal) return order === 'asc' ? 1 : -1
-        return 0
-      }
-    })
-    return sorted
-  }
+        // numeric parse attempt
+        const aNum = parseFloat(String(aVal).replace(/[$,]/g, ''))
+        const bNum = parseFloat(String(bVal).replace(/[$,]/g, ''))
+        const isNumericA = !isNaN(aNum)
+        const isNumericB = !isNaN(bNum)
+        if (isNumericA && isNumericB) {
+          return order === 'asc' ? aNum - bNum : bNum - aNum
+        } else {
+          // string compare
+          aVal = aVal.toLowerCase()
+          bVal = bVal.toLowerCase()
+          if (aVal < bVal) return order === 'asc' ? -1 : 1
+          if (aVal > bVal) return order === 'asc' ? 1 : -1
+          return 0
+        }
+      })
+      return sorted
+    },
+    [sortConfig]
+  )
 
   function getRowColor(partyValue = '') {
     const p = partyValue.toLowerCase()
-  
-    // 1) EXACT matches
-    if (p === 'cpc') return '#639ee0'   // dark-ish blue
-    if (p === 'lpc') return '#9d0001'   // dark red
-    if (p === 'pc')  return '#00becf'   // teal
-  
-    // 2) partial matches for other common terms
+
+    // EXACT matches
+    if (p === 'cpc') return '#639ee0'
+    if (p === 'lpc') return '#9d0001'
+    if (p === 'pc') return '#00becf'
+
+    // partial matches
     if (p.includes('liberal')) return 'red'
     if (p.includes('ndp')) return 'orange'
     if (p.includes('green')) return 'green'
     if (p.includes('atlantica')) return 'purple'
-  
     return ''
   }
-  
 
   // Summaries
   function getPartyTotals(data) {
     const totals = { pc: 0, ndp: 0, liberal: 0, cpc: 0, ndpca: 0, lpc: 0 }
-  
+
     data.forEach((row) => {
       const amountStr = row['Donation'] || '0'
       const amount = parseFloat(amountStr.replace(/[$,]/g, '')) || 0
       const party = (row['Party'] || '').toLowerCase()
-  
-      // 1) EXACT match for PC
+
       if (party === 'pc') {
         totals.pc += amount
-      }
-      // 2) EXACT match for CPC
-      else if (party === 'cpc') {
+      } else if (party === 'cpc') {
         totals.cpc += amount
-      }
-      // 3) If it has 'ndpca', add to ndpca
-      else if (party.includes('ndpca')) {
+      } else if (party.includes('ndpca')) {
         totals.ndpca += amount
-      }
-      // 4) If it has 'ndp', add to ndp
-      else if (party.includes('ndp')) {
+      } else if (party.includes('ndp')) {
         totals.ndp += amount
-      }
-      // 5) If it has 'liberal', add to liberal
-      else if (party.includes('liberal')) {
+      } else if (party.includes('liberal')) {
         totals.liberal += amount
-      }
-      // 6) If it has 'lpc', add to lpc
-      else if (party.includes('lpc')) {
+      } else if (party.includes('lpc')) {
         totals.lpc += amount
       }
-      // else ignore or handle additional logic as needed
     })
-  
+
     return totals
   }
-  
 
   // Filter by "LastName FirstName"
   const filteredData = useMemo(() => {
@@ -233,10 +221,10 @@ export default function App() {
     })
   }, [debouncedSearch, csvData])
 
-  // Sort the filtered data
+  // 2) UseMemo depends on [filteredData, sortData]
   const sortedFilteredData = useMemo(() => {
     return sortData(filteredData)
-  }, [filteredData, sortConfig])
+  }, [filteredData, sortData])
 
   // Totals
   const partyTotals = useMemo(() => getPartyTotals(sortedFilteredData), [sortedFilteredData])
