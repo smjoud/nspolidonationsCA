@@ -186,9 +186,9 @@ export default function App() {
         totals.pc += amount
       } else if (party === 'cpc') {
         totals.cpc += amount
-      } else if (party.includes('ndpca')) {
+      } else if (party.includes('nsndp')) {
         totals.ndpca += amount
-      } else if (party.includes('ndp')) {
+      } else if (party.includes('ndp-ca')) {
         totals.ndp += amount
       } else if (party.includes('liberal')) {
         totals.liberal += amount
@@ -375,11 +375,11 @@ export default function App() {
       <div className="text-sm text-center mt-6">
         <p>
           Collected from Elections Nova Scotia covering from 2005-2023. Only donations
-          of $200 or more are publicly reported from 2010 onward.
+          of $200 or more are publicly reported from 2010 onward. Federal data from 2016-2024.
         </p>
         <p className="mt-1">
           Type your Last Name followed by a space, then First Name. Click table headers
-          to sort.
+          to sortx.
         </p>
       </div>
     </div>
