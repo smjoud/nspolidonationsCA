@@ -173,32 +173,44 @@ export default function App() {
     return ''
   }
 
-  // Summaries
-  function getPartyTotals(data) {
-    const totals = { pc: 0, ndp: 0, liberal: 0, cpc: 0, ndpca: 0, lpc: 0 }
-
-    data.forEach((row) => {
-      const amountStr = row['Donation'] || '0'
-      const amount = parseFloat(amountStr.replace(/[$,]/g, '')) || 0
-      const party = (row['Party'] || '').toLowerCase()
-
-      if (party === 'pc') {
-        totals.pc += amount
-      } else if (party === 'cpc') {
-        totals.cpc += amount
-      } else if (party.includes('nsndp')) {
-        totals.ndpca += amount
-      } else if (party.includes('ndp-ca')) {
-        totals.ndp += amount
-      } else if (party.includes('liberal')) {
-        totals.liberal += amount
-      } else if (party.includes('lpc')) {
-        totals.lpc += amount
-      }
-    })
-
-    return totals
+  // 1) Extended getPartyTotals with explicit checks for nsndp, ndp-ca, ndp
+function getPartyTotals(data) {
+  // Add nsndp and ndp to the totals object
+  const totals = {
+    pc: 0,
+    cpc: 0,
+    nsndp: 0,  // for exactly 'nsndp'
+    ndp: 0,    // for exactly 'ndp'
+    ndpca: 0,  // for exactly 'ndp-ca'
+    liberal: 0,
+    lpc: 0
   }
+
+  data.forEach((row) => {
+    const amountStr = row['Donation'] || '0'
+    const amount = parseFloat(amountStr.replace(/[$,]/g, '')) || 0
+    const p = (row['Party'] || '').toLowerCase()
+
+    if (p === 'pc') {
+      totals.pc += amount
+    } else if (p === 'cpc') {
+      totals.cpc += amount
+    } else if (p === 'nsndp') {
+      totals.nsndp += amount
+    } else if (p === 'ndp-ca') {
+      totals.ndpca += amount
+    } else if (p === 'ndp') {
+      // strictly 'ndp' goes here
+      totals.ndp += amount
+    } else if (p.includes('liberal')) {
+      totals.liberal += amount
+    } else if (p.includes('lpc')) {
+      totals.lpc += amount
+    }
+  })
+
+  return totals
+}
 
   // Filter by "LastName FirstName"
   const filteredData = useMemo(() => {
@@ -305,72 +317,54 @@ export default function App() {
 
       {/* Summary card */}
       {debouncedSearch && (
-        <div className="mt-6 w-full max-w-3xl bg-white text-gray-800 rounded-2xl shadow-xl p-6">
-          <h2 className="text-lg font-bold mb-4">Total Amount Donated</h2>
-          <div className="space-y-4">
-            {/* PC */}
-            <div className="flex items-center">
-              <img
-                src={nspcLogo}
-                alt="PC Party Logo"
-                className="w-10 h-10 rounded-full mr-3"
-              />
-              <span className="font-semibold">PC:</span>
-              <span className="ml-2">${partyTotals.pc.toFixed(2)}</span>
-            </div>
-            {/* NDP */}
-            <div className="flex items-center">
-              <img
-                src={nsndpLogo}
-                alt="NDP Party Logo"
-                className="w-10 h-10 rounded-full mr-3"
-              />
-              <span className="font-semibold">NDP:</span>
-              <span className="ml-2">${partyTotals.ndp.toFixed(2)}</span>
-            </div>
-            {/* Liberal */}
-            <div className="flex items-center">
-              <img
-                src={nslpLogo}
-                alt="Liberal Party Logo"
-                className="w-10 h-10 rounded-full mr-3"
-              />
-              <span className="font-semibold">Liberal:</span>
-              <span className="ml-2">${partyTotals.liberal.toFixed(2)}</span>
-            </div>
-            {/* CPC */}
-            <div className="flex items-center">
-              <img
-                src={cpcLogo}
-                alt="CPC Party Logo"
-                className="w-10 h-10 rounded-full mr-3"
-              />
-              <span className="font-semibold">CPC:</span>
-              <span className="ml-2">${partyTotals.cpc.toFixed(2)}</span>
-            </div>
-            {/* NDPCA */}
-            <div className="flex items-center">
-              <img
-                src={ndpcaLogo}
-                alt="NDPCA Party Logo"
-                className="w-10 h-10 rounded-full mr-3"
-              />
-              <span className="font-semibold">NDPCA:</span>
-              <span className="ml-2">${partyTotals.ndpca.toFixed(2)}</span>
-            </div>
-            {/* LPC */}
-            <div className="flex items-center">
-              <img
-                src={lpcLogo}
-                alt="Liberal Party of Canada Logo"
-                className="w-10 h-10 rounded-full mr-3"
-              />
-              <span className="font-semibold">LPC:</span>
-              <span className="ml-2">${partyTotals.lpc.toFixed(2)}</span>
-            </div>
-          </div>
-        </div>
-      )}
+  <div className="mt-6 w-full max-w-3xl bg-white text-gray-800 rounded-2xl shadow-xl p-6">
+    <h2 className="text-lg font-bold mb-4">Total Amount Donated</h2>
+    <div className="space-y-4">
+      {/* PC */}
+      <div className="flex items-center">
+        <img src={nspcLogo} alt="PC Party Logo" className="w-10 h-10 rounded-full mr-3" />
+        <span className="font-semibold">PC:</span>
+        <span className="ml-2">${partyTotals.pc.toFixed(2)}</span>
+      </div>
+
+      {/* CPC */}
+      <div className="flex items-center">
+        <img src={cpcLogo} alt="CPC Logo" className="w-10 h-10 rounded-full mr-3" />
+        <span className="font-semibold">CPC:</span>
+        <span className="ml-2">${partyTotals.cpc.toFixed(2)}</span>
+      </div>
+
+      {/* NSNDP */}
+      <div className="flex items-center">
+        <img src={nsndpLogo} alt="NSNDP Logo" className="w-10 h-10 rounded-full mr-3" />
+        <span className="font-semibold">NSNDP:</span>
+        <span className="ml-2">${partyTotals.nsndp.toFixed(2)}</span>
+      </div>
+
+      {/* NDPCA */}
+      <div className="flex items-center">
+        <img src={ndpcaLogo} alt="NDPCA Logo" className="w-10 h-10 rounded-full mr-3" />
+        <span className="font-semibold">NDPCA:</span>
+        <span className="ml-2">${partyTotals.ndpca.toFixed(2)}</span>
+      </div>
+
+      {/* Liberal */}
+      <div className="flex items-center">
+        <img src={nslpLogo} alt="Liberal Logo" className="w-10 h-10 rounded-full mr-3" />
+        <span className="font-semibold">Liberal:</span>
+        <span className="ml-2">${partyTotals.liberal.toFixed(2)}</span>
+      </div>
+
+      {/* LPC */}
+      <div className="flex items-center">
+        <img src={lpcLogo} alt="LPC Logo" className="w-10 h-10 rounded-full mr-3" />
+        <span className="font-semibold">LPC:</span>
+        <span className="ml-2">${partyTotals.lpc.toFixed(2)}</span>
+      </div>
+    </div>
+  </div>
+)}
+
 
       <div className="text-sm text-center mt-6">
         <p>
