@@ -245,7 +245,9 @@ function getPartyTotals(data) {
     <div className="min-h-screen w-full p-6 flex flex-col items-center text-white bg-gradient-to-b from-blue-900 to-gray-900">
       <Helmet>
         <title>NSPoli Donors</title>
+        <meta name="description" content="Search through political donations in Nova Scotia" />
         <link rel="icon" type="image/png" href={icon} />
+        <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
       <motion.h1
@@ -368,12 +370,12 @@ function getPartyTotals(data) {
 
       <div className="text-sm text-center mt-6">
         <p>
-          Collected from Elections Nova Scotia covering from 2005-2023. Only donations
-          of $200 or more are publicly reported from 2010 onward. Federal data from 2016-2024.
+          Collected from Elections Nova Scotia covering from 2005-2024. Only donations
+          of $200 or more are publicly reported from 2010 onward. Federal data from 2016-2024. Note there may be duplicate records in federal data.
         </p>
         <p className="mt-1">
           Type your Last Name followed by a space, then First Name. Click table headers
-          to sortx.
+          to sort.
         </p>
       </div>
     </div>
