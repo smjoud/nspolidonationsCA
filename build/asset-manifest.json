@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/static/css/main.ada4b9e2.css",
+    "main.js": "/static/js/main.e0355c28.js",
+    "static/media/nspc_logo.jpg": "/static/media/nspc_logo.801e5796a6193a480299.jpg",
+    "static/media/cpclogo.png": "/static/media/cpclogo.4cd65dd28399f70237b0.png",
+    "static/media/lpclogo.jpg": "/static/media/lpclogo.00144515d3e399713c94.jpg",
+    "index.html": "/index.html",
+    "main.ada4b9e2.css.map": "/static/css/main.ada4b9e2.css.map",
+    "main.e0355c28.js.map": "/static/js/main.e0355c28.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.ada4b9e2.css",
+    "static/js/main.e0355c28.js"
+  ]
+}
