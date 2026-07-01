@@ -23,6 +23,32 @@ function useDebounce(value, delay = 300) {
   return debouncedValue
 }
 
+/** Month abbreviation -> two-digit number, for parsing federal dates. */
+const MONTHS = {
+  jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
+  jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12',
+}
+
+/**
+ * Convert a federal date like '20-Jan-22' (DD-Mon-YY) to ISO 'YYYY-MM-DD'
+ * (e.g. '2022-01-20'). ISO strings sort lexicographically in chronological
+ * order and interleave cleanly with the provincial year-only dates.
+ * Returns the original value unchanged if it doesn't match the expected shape.
+ */
+function toISODate(value = '') {
+  const m = /^(\d{1,2})-([A-Za-z]{3})-(\d{2,4})$/.exec(String(value).trim())
+  if (!m) return value
+  const month = MONTHS[m[2].toLowerCase()]
+  if (!month) return value
+  const day = m[1].padStart(2, '0')
+  let year = m[3]
+  if (year.length === 2) {
+    const yy = parseInt(year, 10)
+    year = String(yy < 70 ? 2000 + yy : 1900 + yy)
+  }
+  return `${year}-${month}-${day}`
+}
+
 /** Our final, unified columns in a fixed order. */
 const allColumns = [
   'Last Name',
@@ -34,6 +60,29 @@ const allColumns = [
   'Date',
   'Donation',
 ]
+
+/**
+ * Remove "clear duplicates": rows that are identical across every displayed
+ * field. The federal source contains many exact repeats (~20% of rows, as the
+ * footer note warns); this keeps the first occurrence of each unique record.
+ * Keys are trimmed and lower-cased so case/whitespace-only differences still
+ * collapse. Rows that differ in any field (e.g. a different recipient or date)
+ * are preserved.
+ */
+function dedupeRows(rows) {
+  const seen = new Set()
+  const unique = []
+  for (const row of rows) {
+    const key = allColumns
+      .map((c) => String(row[c] ?? '').trim().toLowerCase())
+      .join('')
+    if (!seen.has(key)) {
+      seen.add(key)
+      unique.push(row)
+    }
+  }
+  return unique
+}
 
 export default function App() {
   const [csvData, setCsvData] = useState([])
@@ -113,13 +162,13 @@ export default function App() {
                 City: row['City'] || '',
                 Party: party,
                 'Specific Campaign': recipient,
-                Date: row['Date_received'] || '',
+                Date: toISODate(row['Date_received'] || ''),
                 Donation: row['Monetary'] || '',
               }
             })
 
-            // Combine them
-            const combined = [...provincialData, ...federalData]
+            // Combine them, dropping rows that are identical in every field
+            const combined = dedupeRows([...provincialData, ...federalData])
             setCsvData(combined)
           },
         })
@@ -136,11 +185,15 @@ export default function App() {
         let aVal = a[key] ?? ''
         let bVal = b[key] ?? ''
 
+        // Dates (provincial 'YYYY' and federal 'YYYY-MM-DD') sort lexicographically,
+        // which is chronological order; never treat them as plain numbers.
+        const isDateCol = key === 'Date'
+
         // numeric parse attempt
         const aNum = parseFloat(String(aVal).replace(/[$,]/g, ''))
         const bNum = parseFloat(String(bVal).replace(/[$,]/g, ''))
-        const isNumericA = !isNaN(aNum)
-        const isNumericB = !isNaN(bNum)
+        const isNumericA = !isDateCol && !isNaN(aNum)
+        const isNumericB = !isDateCol && !isNaN(bNum)
         if (isNumericA && isNumericB) {
           return order === 'asc' ? aNum - bNum : bNum - aNum
         } else {
@@ -370,8 +423,8 @@ function getPartyTotals(data) {
 
       <div className="text-sm text-center mt-6">
         <p>
-          Collected from Elections Nova Scotia covering from 2005-2024. Only donations
-          of $200 or more are publicly reported from 2010 onward. Federal data from 2016-2024. Note there may be duplicate records in federal data.
+          Collected from Elections Nova Scotia covering from 2005-2025. Only donations
+          of $200 or more are publicly reported from 2010 onward. Federal data from 2015-2025. Exact-duplicate records are automatically hidden.
         </p>
         <p className="mt-1">
           Type your Last Name followed by a space, then First Name. Click table headers
